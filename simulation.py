@@ -1,4 +1,6 @@
+from __future__ import print_function
 from random import randint
+import sys
 
 class Threes(object):
     def __init__(self):
@@ -7,7 +9,7 @@ class Threes(object):
         dice = [];
         for i in range(len(self.kept), 5):
             dice.append(randint(1,6))
-        return dice
+        return sorted(dice)
     def keep(self, keep):
         assert len(keep) >= 1
         self.kept.extend(keep)
@@ -173,28 +175,31 @@ class StrategyMatrix(object):
 # Test a given strategy over many iterations,
 # averaging its results
 class TestStrategy(object):
-    def __init__(self, strategy):
+    def __init__(self, strategy, iterations):
         self.strategy = strategy
+        self.iterations = iterations
     def avg(self):
-        iterations = 10000
         sum = 0
-        for i in range(0, iterations):
+        for i in range(0, self.iterations):
             self.strategy.reset()
             sum += self.strategy.sum()
-        return sum/(iterations * 1.0)
+        return sum/(self.iterations * 1.0)
 
 def p(m, avg):
-    print "["
-    for i in range(5):
-        print str(map(lambda x: int(x), m[i]))
-    print "] = " + str(avg)
+  for i in range(5):
+    print(str(map(lambda x: int(x), m[i])), end="\n")
+  print(' = ' + str(avg), end="\n")
 
-# print "Keep all:   " + str(TestStrategy(StrategyKeepAll()).avg())
-# print "Keep 3:     " + str(TestStrategy(StrategyKeepOnlyThrees()).avg())
-# print "Keep 3/1:   " + str(TestStrategy(StrategyKeepThreesOnes()).avg())
-# print "Keep 3/2/1: " + str(TestStrategy(StrategyKeepThreesOnesTwos()).avg())
-# print "Keep 3/1 l2:  " + str(TestStrategy(StrategyKeepThreesOnesLateTwos()).avg())
-# print "Keep 3 l1/2:  " + str(TestStrategy(StrategyKeepThreesLateOnesLateTwos()).avg())
+# s = []
+# s.append([False, False, True, False, False, False])
+# s.append([False, False, True, False, False, False])
+# s.append([True, True, True, False, False, False])
+# s.append([True, True, True, False, False, False])
+# s.append([True, True, True, False, False, False])
+# print(str(500000) + "\t" + str(TestStrategy(StrategyMatrix(s), 500000).avg()))
+# for i in range(1, 100):
+#  print(str(i*1000) + "\t" + str(TestStrategy(StrategyMatrix(s), i*1000).avg()))
+#  sys.stdout.flush()
 
 min_s = 0;
 min_avg = 100;
@@ -206,8 +211,9 @@ for m in range(0, 2**23):
     s.append([m&(1<<2)>0, m&(1<<8)>0, True, m&(1<<14)>0, m&(1<<20)>0, False])
     s.append([m&(1<<1)>0, m&(1<<7)>0, True, m&(1<<13)>0, m&(1<<19)>0, False])
     s.append([m&(1<<0)>0, m&(1<<6)>0, True, m&(1<<12)>0, m&(1<<18)>0, False])
-    avg = TestStrategy(StrategyMatrix(s)).avg()
+    avg = TestStrategy(StrategyMatrix(s), 20000).avg()
     if avg < min_avg:
         min_avg = avg
         min_s = s
         p(min_s, avg)
+        sys.stdout.flush()
