@@ -81,77 +81,6 @@ class StrategyKeepThreesOnes(object):
         return self.game.sum()
 
 # Only keep threes/ones/twos or the lowest
-# valued dice we have
-class StrategyKeepThreesOnesTwos(object):
-    def __init__(self):
-        self.game = Threes()
-    def reset(self):
-        self.game = Threes()
-    def round(self):
-        dice = self.game.roll()
-        keep = []
-        for i in dice:
-            if i == 3 or i == 1 or i == 2:
-                keep.append(i)
-        if len(keep) < 1:
-            keep.append(min(dice))
-        self.game.keep(keep)
-    def sum(self):
-        while not self.game.isComplete():
-            self.round()
-        return self.game.sum()
-
-# Only keep threes/ones or the lowest
-# valued dice we have, unless we're
-# close to the end
-class StrategyKeepThreesOnesLateTwos(object):
-    def __init__(self):
-        self.game = Threes()
-    def reset(self):
-        self.game = Threes()
-    def round(self):
-        dice = self.game.roll()
-        keep = []
-        for i in dice:
-            if i == 3 or i == 1:
-                keep.append(i)
-            elif i == 2 and self.game.keptLen() >= 3:
-                keep.append(i)
-        if len(keep) < 1:
-            keep.append(min(dice))
-        self.game.keep(keep)
-    def sum(self):
-        while not self.game.isComplete():
-            self.round()
-        return self.game.sum()
-
-# Only keep threes/ones or the lowest
-# valued dice we have, unless we're
-# close to the end
-class StrategyKeepThreesLateOnesLateTwos(object):
-    def __init__(self):
-        self.game = Threes()
-    def reset(self):
-        self.game = Threes()
-    def round(self):
-        dice = self.game.roll()
-        keep = []
-        for i in dice:
-            if i == 3:
-                keep.append(i)
-            elif i == 1 and self.game.keptLen() >= 2:
-                keep.append(i)
-            elif i == 2 and self.game.keptLen() >= 3:
-                keep.append(i)
-        if len(keep) < 1:
-            keep.append(min(dice))
-        self.game.keep(keep)
-    def sum(self):
-        while not self.game.isComplete():
-            self.round()
-        return self.game.sum()
-
-# Use the strategy defined by the given matrix
 class StrategyMatrix(object):
     def __init__(self, matrix):
         self.game = Threes()
@@ -201,17 +130,27 @@ def p(m, avg):
 #  print(str(i*1000) + "\t" + str(TestStrategy(StrategyMatrix(s), i*1000).avg()))
 #  sys.stdout.flush()
 
+# 6.3805368
+# s = []
+# s.append([0, 0, 1, 0, 0, 0])
+# s.append([1, 0, 1, 0, 0, 0])
+# s.append([1, 0, 1, 0, 0, 0])
+# s.append([1, 1, 1, 0, 0, 0])
+# s.append([1, 1, 1, 0, 0, 0])
+# avg = TestStrategy(StrategyMatrix(s), 5000000).avg()
+# print(str(avg))
+# sys.exit(0)
+
 min_s = 0;
 min_avg = 100;
-for m in range(0, 2**23):
+for m in range(0, 2**6):
     s = []
-    s.append([m&(1<<5)>0, m&(1<<11)>0, True, m&(1<<17)>0, m&(1<<23)>0, False])
-    s.append([m&(1<<4)>0, m&(1<<10)>0, True, m&(1<<16)>0, m&(1<<22)>0, False])
-    s.append([m&(1<<3)>0, m&(1<<9)>0, True, m&(1<<15)>0, m&(1<<21)>0, False])
-    s.append([m&(1<<2)>0, m&(1<<8)>0, True, m&(1<<14)>0, m&(1<<20)>0, False])
-    s.append([m&(1<<1)>0, m&(1<<7)>0, True, m&(1<<13)>0, m&(1<<19)>0, False])
-    s.append([m&(1<<0)>0, m&(1<<6)>0, True, m&(1<<12)>0, m&(1<<18)>0, False])
-    avg = TestStrategy(StrategyMatrix(s), 20000).avg()
+    s.append([m&(1<<2)>0, False,      True, False,      False, False])
+    s.append([m&(1<<1)>0, m&(1<<5)>0, True, False,      False, False])
+    s.append([m&(1<<0)>0, m&(1<<4)>0, True, False,      False, False])
+    s.append([True,       m&(1<<3)>0, True, False,      False, False])
+    s.append([True,       True,       True, m&(1<<6)>0, False, False])
+    avg = TestStrategy(StrategyMatrix(s), 500000).avg()
     if avg < min_avg:
         min_avg = avg
         min_s = s
