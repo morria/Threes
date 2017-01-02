@@ -140,6 +140,26 @@ func strategyFromInt(s int) Strategy {
     return strategy
 }
 
+func strategyFromInt_1(s int) Strategy {
+    strategy := Strategy{}
+    strategy = append(strategy, []bool{(s&(1<<0))>0, false, true, false, false, false})
+    strategy = append(strategy, []bool{(s&(1<<1))>0, false, true, false, false, false})
+    strategy = append(strategy, []bool{(s&(1<<2))>0, false, true, false, false, false})
+    strategy = append(strategy, []bool{(s&(1<<3))>0, false, true, false, false, false})
+    strategy = append(strategy, []bool{(s&(1<<4))>0, false, true, false, false, false})
+    return strategy
+}
+
+func strategyFromInt_0() Strategy {
+    strategy := Strategy{}
+    strategy = append(strategy, []bool{false, false, true, false, false, false})
+    strategy = append(strategy, []bool{false, false, true, false, false, false})
+    strategy = append(strategy, []bool{false, false, true, false, false, false})
+    strategy = append(strategy, []bool{false, false, true, false, false, false})
+    strategy = append(strategy, []bool{false, false, true, false, false, false})
+    return strategy
+}
+
 /**
  * Produce a set of strategies from a set of
  * integers
@@ -169,18 +189,23 @@ func main() {
   // that produces the lowest average values
   strategyCount := 0
   for s0 := 0; s0 <= (int(math.Pow(2, 8)) - 1); s0++ {
-    for s1 := 0; s1 <= (int(math.Pow(2, 8)) - 1); s1++ {
-      go evaluateStrategy(strategySetFromIntSet([]int{s0, s0, s0, s1}), 100000, channel)
+    for s1 := 0; s1 <= (int(math.Pow(2, 5)) - 1); s1++ {
+      strategySet := StrategySet{}
+      strategySet = append(strategySet, strategyFromInt(s0))
+      strategySet = append(strategySet, strategyFromInt(s0))
+      strategySet = append(strategySet, strategyFromInt(s0))
+      strategySet = append(strategySet, strategyFromInt_1(s1))
+      strategySet = append(strategySet, strategyFromInt_0())
+      go evaluateStrategy(strategySet, 400000, channel)
       strategyCount++
     }
   }
 
   // We're going to hunt for the lowest average value
-  minEval := StrategyEvaluation{strategySetFromIntSet([]int{}), 30.0, []float64{}}
+  minEval := StrategyEvaluation{strategySetFromIntSet([]int{}), 30.0, []float64{0.0, 0.0, 0.0, 0.0, 0.0}}
   for i := 0; i < strategyCount; i++ {
-  // for s := 0; s <= (int(math.Pow(2, 10)) - 1); s++ {
     eval := <-channel
-    if eval.average < minEval.average {
+    if eval.nonLossRatios[4] > minEval.nonLossRatios[4] {
       minEval = eval
     }
     if i%100 == 0 {
