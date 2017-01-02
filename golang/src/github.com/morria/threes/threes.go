@@ -170,7 +170,7 @@ func main() {
   strategyCount := 0
   for s0 := 0; s0 <= (int(math.Pow(2, 8)) - 1); s0++ {
     for s1 := 0; s1 <= (int(math.Pow(2, 8)) - 1); s1++ {
-      go evaluateStrategy(strategySetFromIntSet([]int{s0, s0, s0, s1}), 1000, channel)
+      go evaluateStrategy(strategySetFromIntSet([]int{s0, s0, s0, s1}), 100000, channel)
       strategyCount++
     }
   }
