@@ -189,23 +189,17 @@ func main() {
   // that produces the lowest average values
   strategyCount := 0
   for s0 := 0; s0 <= (int(math.Pow(2, 8)) - 1); s0++ {
-    for s1 := 0; s1 <= (int(math.Pow(2, 5)) - 1); s1++ {
-      strategySet := StrategySet{}
-      strategySet = append(strategySet, strategyFromInt(s0))
-      strategySet = append(strategySet, strategyFromInt(s0))
-      strategySet = append(strategySet, strategyFromInt(s0))
-      strategySet = append(strategySet, strategyFromInt_1(s1))
-      strategySet = append(strategySet, strategyFromInt_0())
-      go evaluateStrategy(strategySet, 400000, channel)
-      strategyCount++
-    }
+    strategySet := StrategySet{}
+    strategySet = append(strategySet, strategyFromInt(s0))
+    go evaluateStrategy(strategySet, 100000, channel)
+    strategyCount++
   }
 
   // We're going to hunt for the lowest average value
   minEval := StrategyEvaluation{strategySetFromIntSet([]int{}), 30.0, []float64{0.0, 0.0, 0.0, 0.0, 0.0}}
   for i := 0; i < strategyCount; i++ {
     eval := <-channel
-    if eval.nonLossRatios[4] > minEval.nonLossRatios[4] {
+    if eval.average < minEval.average {
       minEval = eval
     }
     if i%100 == 0 {
